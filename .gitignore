@@ -1,3 +1,10 @@
+.metadata/
+RemoteSystemsTempFiles/
+*.zip
+*.tar.gz
+*.tar.xz
+*.tgz
+
 # Prerequisites
 *.d
 
