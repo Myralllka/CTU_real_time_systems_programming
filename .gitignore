@@ -1,5 +1,6 @@
 .metadata/
 RemoteSystemsTempFiles/
+*SIMLINUXgnu/
 *.zip
 *.tar.gz
 *.tar.xz
