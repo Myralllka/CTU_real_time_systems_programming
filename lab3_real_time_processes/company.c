@@ -69,8 +69,8 @@ int create_upper(int i) {
 	return taskSpawn(taskName, 210, 0, 4096, (FUNCPTR) digger_up_the_hole, i, 0, 0, 0, 0, 0, 0, 0, 0, 0);	
 }
 
-int main(void){
-	char * company_name = argv[1];
+int main(int argc, char* argv[]){
+	char* company_name[] = argv[1];
 	semShovels = semCCreate(SEM_Q_FIFO, SHOVELS);
 	semSoilHeap = semCCreate(SEM_Q_FIFO, 0);
 	l_diggers_ids[l_diggers_count] = create_lower(l_diggers_count);
