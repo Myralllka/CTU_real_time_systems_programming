@@ -22,15 +22,16 @@ void digger_in_hole(int n)
 {
   printf("lower digger %d: arriving\n", n);
   while (1) {
-    taskSafe();
+	taskSafe();
     semTake(semShovels, WAIT_FOREVER);
+    
     printf("lower digger %d: working\n", n);
     taskDelay(WORK_TIME);
     semGive(semSoilHeap);
     semGive(semShovels);
+    taskUnsafe();
     printf("lower digger %d: resting\n", n);
     taskDelay(BREAK_TIME);
-    taskUnsafe();
   }
 }
 
@@ -38,20 +39,20 @@ void digger_up_the_hole(int n)
 {
   printf("upper digger %d: arriving\n", n);
   while (1) {
+	semTake(semSoilHeap, WAIT_FOREVER);
 	taskSafe();
-	int errcode = semTake(semShovels, 3);
-	if (errcode == ERROR) continue;
-	errcode = semTake(semSoilHeap, 3);
-	if (errcode == ERROR) {
-		semGive(semShovels);
+	int errcode = semTake(semShovels, 10);
+	if (errcode == ERROR){
+		semGive(semSoilHeap);
+		taskUnsafe();
 		continue;
 	}
 	printf("upper digger %d: working\n", n);
     taskDelay(WORK_TIME);
     semGive(semShovels);
+    taskUnsafe();
     printf("upper digger %d: resting\n", n);
     taskDelay(BREAK_TIME);
-    taskUnsafe();
   }
 }
 
@@ -71,13 +72,12 @@ int create_upper(int i) {
 
 void CreateTasks(void){
 	semShovels = semCCreate(SEM_Q_FIFO, SHOVELS);
-	semSoilHeap = semCCreate(SEM_Q_FIFO, MAX_NUM_OF_DIGGERS);
+	semSoilHeap = semCCreate(SEM_Q_FIFO, 0);
 	l_diggers_ids[l_diggers_count] = create_lower(l_diggers_count);
 	++l_diggers_count;
 	u_diggers_ids[u_diggers_count] = create_upper(u_diggers_count);
 	++u_diggers_count;
 	while (1) {
-		
 		switch getchar() {
 			case 'i': 
 				if (l_diggers_count >= MAX_NUM_OF_DIGGERS) break;
@@ -118,4 +118,3 @@ void CreateTasks(void){
 		}
 	}
 }
-
