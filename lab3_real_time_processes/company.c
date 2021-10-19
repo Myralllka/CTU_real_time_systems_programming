@@ -71,7 +71,7 @@ int create_upper(int i) {
 
 int main(int argc, char* argv[]){
 	//	argv[1] == company name
-	if (argc != 1) {
+	if (argc != 2) {
 		return -1;
 	}
 	init_shm(1, argv[1]);

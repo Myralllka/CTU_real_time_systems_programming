@@ -9,7 +9,9 @@
 #include <stdio.h>
 #include "structs.h"
 
-#define WRONG_COMPANY_NAME -2
+#define WRONG_COMPANY_NAME 2
+#define ERROR_FTRUNC 3
+#define ERROR_MAPPING 4
 
 int init_shm(int is_company, char* c_name) {
     int fd;
@@ -38,14 +40,14 @@ int init_shm(int is_company, char* c_name) {
     /* set the size of shared memory block */
     if (ftruncate (fd, sizeof(struct company_registry)) == -1) {
         perror("ftruncate");
-        exit (1);
+        exit (ERROR_FTRUNC);
     }
     /* Map shared memory object in the process address space */
     ptr = (struct company_registry *)mmap(0, sizeof(struct company_registry),
                           	  	  	  	  	  PROT_READ | PROT_WRITE,
                           	  	  	  	  	  MAP_SHARED, fd, 0);
     if (ptr == (struct company_registry *)MAP_FAILED)
-        exit (1);
+        exit (ERROR_MAPPING);
     
     /* close the file descriptor; the mapping is not impacted by this */
     close (fd);
