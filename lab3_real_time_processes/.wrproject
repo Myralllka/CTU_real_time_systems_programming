@@ -2466,6 +2466,7 @@
         <buildtarget buildtool="Linker" name="monitor" passed="false" targetname="monitor">
             <contents>
                 <file name="/lab3_real_time_processes/monitor.c"/>
+                <file name="/lab3_real_time_processes/shm.c"/>
             </contents>
         </buildtarget>
     </buildtargets>

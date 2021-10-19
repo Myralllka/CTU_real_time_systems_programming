@@ -1,13 +1,13 @@
 #include <taskLib.h>
 #include <stdio.h>
 #include <semLib.h>
+#include "structs.h"
 
 #define WORK_TIME 50
 #define BREAK_TIME 50
 
 SEM_ID semShovels;
 SEM_ID semSoilHeap;
-
 		
 const int MAX_NUM_OF_DIGGERS = 50;
 const int SHOVELS = 3;
@@ -70,7 +70,12 @@ int create_upper(int i) {
 }
 
 int main(int argc, char* argv[]){
-	char* company_name[] = argv[1];
+	//	argv[1] == company name
+	if (argc != 1) {
+		return -1;
+	}
+	init_shm(1, argv[1]);
+	
 	semShovels = semCCreate(SEM_Q_FIFO, SHOVELS);
 	semSoilHeap = semCCreate(SEM_Q_FIFO, 0);
 	l_diggers_ids[l_diggers_count] = create_lower(l_diggers_count);
