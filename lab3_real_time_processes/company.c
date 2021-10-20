@@ -1,3 +1,4 @@
+#include <sys/mman.h>
 #include <taskLib.h>
 #include <stdio.h>
 #include <semLib.h>
@@ -74,7 +75,8 @@ int main(int argc, char* argv[]){
 	if (argc != 2) {
 		return -1;
 	}
-	init_shm(1, argv[1]);
+	
+	int id = init_shm(1, argv[1]);
 	
 	semShovels = semCCreate(SEM_Q_FIFO, SHOVELS);
 	semSoilHeap = semCCreate(SEM_Q_FIFO, 0);
