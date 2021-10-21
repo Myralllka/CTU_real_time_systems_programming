@@ -114,21 +114,11 @@ int main(int argc, char* argv[]){
 				u_diggers_count--;
 				break;
 			case 'E': 
-//				for (i = 0; i < l_diggers_count; ++i) {
-//					taskDelete(l_diggers_ids[i]);
-//					printf("lower digger %d: leaving\n", i);
-//				}
-//				for (i = 0; i < u_diggers_count; ++i) {
-//					taskDelete(u_diggers_ids[i]);
-//					printf("upper digger %d: leaving\n", i);
-//				}
+
 				semTake(lock, WAIT_FOREVER);
 				(&ptr->companies[m_id])->is_empty = 1;
 				(&ptr->companies[m_id])->n_of_soil_done = 0;
-//				(&ptr->companies[m_id])->name = "\0";
 				semGive(lock);
-//				u_diggers_count = 0;
-//				l_diggers_count = 0;
 				
 				return 0;
 			default:
