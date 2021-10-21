@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include "config.h"
 
 /* Subtract the `struct timespec' values X and Y,
    storing the result in RESULT (result = x - y).
@@ -40,13 +41,21 @@ void do_work_for_some_time(int x)
 // activated first
 // low priority task
 void tLPrio() {
-	
+//	while (!end) {
+//	  semTake(mutex, WAIT_FOREVER);
+//	  do_something_while_the_mutex_is_locked();
+//	  semGive(mutex);
+//	  taskDelay(LOW_PRIORITY_DELAY); /* this delay can be even zero - do you know why? */
+//	}
 }
 
 // activated second
 // middle priority task
 void tMPrio() {
-	
+//	while (!end) {
+//	  do_something_very_long();
+//	  taskDelay(MID_PRIORITY_DELAY); /* wait to let the low priority task run */
+//	}
 }
 
 // activated third
