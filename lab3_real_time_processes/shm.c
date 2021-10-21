@@ -60,17 +60,17 @@ int init_shm(int is_company, char* c_name) {
     
     /* close the file descriptor; the mapping is not impacted by this */
     close (fd);
-    semGive(lock);
+    
    
     /* the fist company should zero the memory this way: */
     if (!is_init) {
-    	semTake(lock, WAIT_FOREVER);
     	memset(ptr, 0, sizeof(struct company_registry));
     	for (int i = 0; i < 50; ++i) {
     		(&ptr->companies[i])->is_empty = 1;
     	}
-    	semGive(lock);
+    	
     }
+    semGive(lock);
     
     int i = 0;
     if (is_company) {

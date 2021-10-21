@@ -24,9 +24,8 @@ int main(){
 				semGive(lock);
 				continue;
 			} else {
-				strcpy(name, (&ptr->companies[i])->name);
+				printf("%s\t: %i\n", (&ptr->companies[i])->name, (&ptr->companies[i])->n_of_soil_done);
 				semGive(lock);
-				printf("%s\t: %i\n", name, (&ptr->companies[i])->n_of_soil_done);
 			}
 		}
 		printf("-----------------------\n");
