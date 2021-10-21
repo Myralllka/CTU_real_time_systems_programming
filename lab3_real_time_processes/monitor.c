@@ -18,7 +18,6 @@ int main(){
 	
 	printf("--- Monitor started ---\n");
 	while(1) {
-		printf("-----------------------\n");
 		for (int i = 0; i < 50; ++i) {
 			semTake(lock, WAIT_FOREVER);
 			if ((&ptr->companies[i])->is_empty){

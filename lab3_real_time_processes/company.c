@@ -17,6 +17,7 @@ int u_diggers_count = 0;
 int l_diggers_ids[50];
 int u_diggers_ids[50];
 int i = 0;
+int m_id;
 
 void digger_in_hole(int n)
 {
@@ -49,6 +50,9 @@ void digger_up_the_hole(int n)
 	}
 	printf("upper digger %d: working\n", n);
     taskDelay(WORK_TIME);
+    semTake(lock, WAIT_FOREVER);
+    ++(&ptr->companies[m_id])->n_of_soil_done;
+    semGive(lock);
     semGive(semShovels);
     taskUnsafe();
     printf("upper digger %d: resting\n", n);
@@ -76,7 +80,7 @@ int main(int argc, char* argv[]){
 		return -1;
 	}
 	
-	int id = init_shm(1, argv[1]);
+	m_id = init_shm(1, argv[1]);
 	
 	semShovels = semCCreate(SEM_Q_FIFO, SHOVELS);
 	semSoilHeap = semCCreate(SEM_Q_FIFO, 0);
@@ -110,17 +114,23 @@ int main(int argc, char* argv[]){
 				u_diggers_count--;
 				break;
 			case 'E': 
-				for (i = 0; i < l_diggers_count; ++i) {
-					taskDelete(l_diggers_ids[i]);
-					printf("lower digger %d: leaving\n", i);
-				}
-				for (i = 0; i < u_diggers_count; ++i) {
-					taskDelete(u_diggers_ids[i]);
-					printf("upper digger %d: leaving\n", i);
-				}
-				u_diggers_count = 0;
-				l_diggers_count = 0;
-				break;
+//				for (i = 0; i < l_diggers_count; ++i) {
+//					taskDelete(l_diggers_ids[i]);
+//					printf("lower digger %d: leaving\n", i);
+//				}
+//				for (i = 0; i < u_diggers_count; ++i) {
+//					taskDelete(u_diggers_ids[i]);
+//					printf("upper digger %d: leaving\n", i);
+//				}
+				semTake(lock, WAIT_FOREVER);
+				(&ptr->companies[m_id])->is_empty = 1;
+				(&ptr->companies[m_id])->n_of_soil_done = 0;
+//				(&ptr->companies[m_id])->name = "\0";
+				semGive(lock);
+//				u_diggers_count = 0;
+//				l_diggers_count = 0;
+				
+				return 0;
 			default:
 				continue;
 		}
