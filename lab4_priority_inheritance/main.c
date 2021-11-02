@@ -1,6 +1,16 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+#include <time.h>
+#include <taskLib.h>
+#include <semLib.h>
+#include <sysLib.h>
+
 #include "config.h"
+
+SEM_ID global_mutex;
+int num_of_mes;
+int end = 0;
 
 /* Subtract the `struct timespec' values X and Y,
    storing the result in RESULT (result = x - y).
@@ -8,8 +18,7 @@
 
 int timespec_subtract (	struct timespec *result,
 						struct timespec *x,
-						struct timespec *y)
-{
+						struct timespec *y){
   /* Perform the carry for the later subtraction by updating Y. */
   if (x->tv_nsec < y->tv_nsec) {
     int num_sec = (y->tv_nsec - x->tv_nsec) / 1000000000 + 1;
@@ -37,67 +46,95 @@ void do_work_for_some_time(int x)
     while (len > 0) len--;
 }
 
+void do_something_while_the_mutex_is_locked() {
+	do_work_for_some_time(5);
+}
+
+void do_something_very_long() {
+	do_something_very_long(30);
+}
 
 // activated first
 // low priority task
 void tLPrio() {
-//	while (!end) {
-//	  semTake(mutex, WAIT_FOREVER);
-//	  do_something_while_the_mutex_is_locked();
-//	  semGive(mutex);
-//	  taskDelay(LOW_PRIORITY_DELAY); /* this delay can be even zero - do you know why? */
-//	}
+	while (!end) {
+	  semTake(global_mutex, WAIT_FOREVER);
+	  do_something_while_the_mutex_is_locked();
+	  semGive(global_mutex);
+	  taskDelay(LOW_PRIORITY_DELAY); /* this delay can be even zero - do you know why? */
+	}
 }
 
 // activated second
 // middle priority task
 void tMPrio() {
-//	while (!end) {
-//	  do_something_very_long();
-//	  taskDelay(MID_PRIORITY_DELAY); /* wait to let the low priority task run */
-//	}
+	while (!end) {
+	  do_something_very_long();
+	  taskDelay(MID_PRIORITY_DELAY); /* wait to let the low priority task run */
+	}
 }
 
 // activated third
 // high priority task
 void tHPrio() {
 	// pseudocode 
-	/* while (loop NUMBER_OF_MEASUREMENTS times ) {
+	for (int i = 0; i < num_of_mes; ++i) {
 	  struct timespec tstart, tend, result;
 	  clock_gettime(CLOCK_MONOTONIC, &tstart);
-	  if (semTake(mutex, WAIT_FOREVER) == ERROR)
+	  if (semTake(global_mutex, WAIT_FOREVER) == ERROR)
 	    fprintf(stderr, "semTake error\n");
 	  clock_gettime(CLOCK_MONOTONIC, &tend);
-	  semGive(mutex);
+	  semGive(global_mutex);
 	  timespec_subtract(&result, &tend, &tstart);
 	  // Handle measurement and print if necessary 
 	  taskDelay(HIGH_PRIORITY_DELAY); // let other tasks run 
-	  n++;
 	}
-
-	end = 1; // Signal the other tasks to end  */
+	end = 1; // Signal the other tasks to end 
 }
 
 int main(int argc, char* argv[]) {
-	// argv[1] == "1" 	--> runs the tasks without priority inheritance,
-	// argv[1] == "2" 	--> runs the tasks with priority inheritance,
-	// other   		  	--> terminates the app
+
+	cpuset_t affinity;
+
+	if (argc != 3) return -1;
+	if (argv[1][0] == '1') {
+		global_mutex = semMCreate(SEM_DELETE_SAFE);
+	} else if (argv[1][0] == '2') {
+		global_mutex = semMCreate(SEM_INVERSION_SAFE | SEM_DELETE_SAFE);
+	} else return -2;
 	
-	// argv[2] 		  	--> configures the number of measurements
+	num_of_mes = atoi(argv[2]);
 	
-	// Report start of the measurement by printing measurement started and end of 
-	// the measurement by printing measurement finished. As measurement finishes, 
-	// all created tasks should end as well.
-	
-	// This behaviour is controlled by the high priority task. When the target 
-	// number of the measurements is reached, a global variable (e.g. end) should 
-	// be set to a certain value, that allows the other tasks to end.
-	
+//	printf("%s\n", "Measurement started");
+//	
+//	printf("%s\n", "Measurement finished");
+	int l, m, h;
+
+	/* Create the task but only activate it after setting its affinity */
+	l = taskCreate("tLPrio", 210, 0, 4096, (FUNCPTR) digger_up_the_hole, i, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+	l = taskCreate("tMPrio", 210, 0, 4096, (FUNCPTR) digger_up_the_hole, i, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+	l = taskCreate("tHPrio", HIGH_PRIORITY, 0, 4096, (FUNCPTR) digger_up_the_hole, i, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+
+	if (tid == NULL)
+	    return (ERROR);
+
+	/* Clear the affinity CPU set and set index for CPU 1 */
+	CPUSET_ZERO (affinity);
+	CPUSET_SET (affinity, 1);
+
+	if (taskCpuAffinitySet (tid, affinity) == ERROR)
+	{
+	    /* Either CPUs are not enabled or we are in UP mode */
+	    taskDelete (tid);
+	    return (ERROR);
+	}
+
+	/* Now let the task run on CPU 1 */
+	taskActivate (tid);
 	
 	// Measured worst-case mutex blocking time is printed to standard output each 
 	// time it changes as integer number of milliseconds (without units) followed 
 	// by a newline character.
-	
 	
 	// To achieve higher clock precision use sysClkRateSet() function.
 	
