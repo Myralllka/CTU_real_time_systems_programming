@@ -2,9 +2,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
+#include <sysLib.h>
 #include <taskLib.h>
 #include <semLib.h>
-#include <sysLib.h>
+#include <timers.h>
 #include <cpuset.h>
 #include "config.h"
 
@@ -19,6 +20,8 @@ int end = 0;
 int timespec_subtract (	struct timespec *result,
 						struct timespec *x,
 						struct timespec *y){
+  sysClkRateSet(CLOCK_RATE);
+	
   /* Perform the carry for the later subtraction by updating Y. */
   if (x->tv_nsec < y->tv_nsec) {
     int num_sec = (y->tv_nsec - x->tv_nsec) / 1000000000 + 1;
@@ -47,15 +50,15 @@ void do_work_for_some_time(int x)
 }
 
 void do_something_while_the_mutex_is_locked() {
-	do_work_for_some_time(5);
+	do_work_for_some_time(LOW_PRIORITY_WORK);
 }
 
 void do_something_very_long() {
-	do_something_very_long(30);
+	do_work_for_some_time(MID_PRIORITY_WORK);
 }
 
-// activated first
-// low priority task
+/* activated first
+low priority task*/
 void tLPrio() {
 	while (!end) {
 	  semTake(global_mutex, WAIT_FOREVER);
@@ -65,20 +68,25 @@ void tLPrio() {
 	}
 }
 
-// activated second
-// middle priority task
+/* activated second
+ middle priority task */
 void tMPrio() {
 	while (!end) {
 	  do_something_very_long();
 	  taskDelay(MID_PRIORITY_DELAY); /* wait to let the low priority task run */
 	}
 }
-
-// activated third
-// high priority task
+int time_to_ms (struct timespec *time) {
+	return time->tv_sec * 1000 + time->tv_nsec / 1000000;
+}
+/* activated third
+ high priority task */
 void tHPrio() {
-	// pseudocode 
-	for (int i = 0; i < num_of_mes; ++i) {
+	
+	printf("%s\n0\n", "Measurement started");
+	int max_time = 0, current;
+	int i;
+	for (i = 0; i < num_of_mes; ++i) {
 	  struct timespec tstart, tend, result;
 	  clock_gettime(CLOCK_MONOTONIC, &tstart);
 	  if (semTake(global_mutex, WAIT_FOREVER) == ERROR)
@@ -86,66 +94,59 @@ void tHPrio() {
 	  clock_gettime(CLOCK_MONOTONIC, &tend);
 	  semGive(global_mutex);
 	  timespec_subtract(&result, &tend, &tstart);
-	  // Handle measurement and print if necessary 
+	  /* Handle measurement and print if necessary*/
+	  current = time_to_ms(&result);
+	  if (current > max_time) {
+		  printf("%i\n", current);
+		  max_time = current;
+	  }
 	  taskDelay(HIGH_PRIORITY_DELAY); // let other tasks run 
 	}
-	end = 1; // Signal the other tasks to end 
+	end = 1; // Signal the other tasks to end
+	printf("%s\n", "Measurement finished");
 }
 
-int main(int argc, char* argv[]) {
-
+void CreateTasks(int a1, int a2) {
+	
 	cpuset_t affinity;
 
-	if (argc != 3) return -1;
-	if (argv[1][0] == '1') {
-		global_mutex = semMCreate(SEM_DELETE_SAFE);
-	} else if (argv[1][0] == '2') {
-		global_mutex = semMCreate(SEM_INVERSION_SAFE | SEM_DELETE_SAFE);
-	} else return -2;
+	if (a1 == 1)
+		global_mutex = semMCreate(0);
+	else if (a1 == 2)
+		global_mutex = semMCreate(SEM_INVERSION_SAFE|SEM_Q_PRIORITY);
+	else return;
 	
-	num_of_mes = atoi(argv[2]);
-	
-//	printf("%s\n", "Measurement started");
-//	
-//	printf("%s\n", "Measurement finished");
-	int low, middle, high;
+	num_of_mes = a2;
+	sysClkRateSet(CLOCK_RATE);
 
+	TASK_ID low, middle, high;
+	
 	/* Create the task but only activate it after setting its affinity */
 	low = taskCreate("tLPrio", LOW_PRIORITY, 0, 4096, (FUNCPTR) tLPrio, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 	middle = taskCreate("tMPrio", MID_PRIORITY, 0, 4096, (FUNCPTR) tMPrio, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 	high = taskCreate("tHPrio", HIGH_PRIORITY, 0, 4096, (FUNCPTR) tHPrio, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-
-	if (low == NULL || middle == NULL || high == NULL)
-	    return (ERROR);
-
+	
+	if (low == TASK_ID_ERROR || middle == TASK_ID_ERROR || high == TASK_ID_ERROR)
+	    return;
+	
 	/* Clear the affinity CPU set and set index for CPU 1 */
 	CPUSET_ZERO (affinity);
-	CPUSET_SET (affinity, 1);
-
-	if (taskCpuAffinitySet ( low, affinity) == ERROR) {
+	CPUSET_SET (affinity, 0);
+	
+	if (taskCpuAffinitySet ( low, affinity) == ERROR || 
+			taskCpuAffinitySet(middle, affinity) == ERROR || 
+			taskCpuAffinitySet(middle, affinity) == ERROR) {
 	    /* Either CPUs are not enabled or we are in UP mode */
 	    taskDelete (low);
-	    return (ERROR);
+	    taskDelete(middle);
+	    taskDelete(high);
+	    return;
 	}
-	if (taskCpuAffinitySet(middle, affinity) == ERROR) {
-		 taskDelete(middle);
-		 return (ERROR);
-	}
-	if (taskCpuAffinitySet(high, affinity) == ERROR) {
-		taskDelete(high);
-		return (ERROR);
-	}
-
+	
 	/* Now let the task run on CPU 1 */
 	taskActivate (low);
 	taskActivate(middle);
 	taskActivate(high);
 	
-	// Measured worst-case mutex blocking time is printed to standard output each 
-	// time it changes as integer number of milliseconds (without units) followed 
-	// by a newline character.
-	
-	// To achieve higher clock precision use sysClkRateSet() function.
-	
-	return 0;
+	return;
 }
