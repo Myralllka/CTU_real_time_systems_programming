@@ -16,6 +16,6 @@
 /* Delays of the tasks. Fill them with your own values */
 #define HIGH_PRIORITY_DELAY     100
 #define MID_PRIORITY_DELAY      20
-#define LOW_PRIORITY_DELAY      10
+#define LOW_PRIORITY_DELAY      5
 
-#endif // CONFIG_H
+#endif

@@ -5,7 +5,7 @@ int num_of_mes = 0;
 
 void CreateTasks(int a1, int a2) {
 	
-	// for one core execution
+	/* for one core execution*/
 	cpuset_t affinity;
 	
 	/* 	passing value 1 runs the tasks without priority inheritance,
@@ -17,7 +17,7 @@ void CreateTasks(int a1, int a2) {
 	else if (a1 == 2)
 		global_mutex = semMCreate(SEM_INVERSION_SAFE|SEM_Q_PRIORITY);
 	else return;
-	// The second parameter configures the number of measurements.
+	/* The second parameter configures the number of measurements.*/
 	num_of_mes = a2;
 	
 	sysClkRateSet(CLOCK_RATE);
@@ -32,7 +32,7 @@ void CreateTasks(int a1, int a2) {
 	if (low == TASK_ID_ERROR || middle == TASK_ID_ERROR || high == TASK_ID_ERROR)
 	    return;
 	
-	// for one core execution
+	/* for one core execution */
 	/* Clear the affinity CPU set and set index for CPU 1 */
 	CPUSET_ZERO (affinity);
 	CPUSET_SET (affinity, 0);

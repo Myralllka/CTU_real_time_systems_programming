@@ -1,6 +1,6 @@
 #include "utils.h"
 
-// tasks 
+/* tasks*/ 
 
 /* activated first
 low priority task*/
@@ -43,13 +43,13 @@ void tHPrio() {
 		  printf("%i\n", current);
 		  max_time = current;
 	  }
-	  taskDelay(HIGH_PRIORITY_DELAY); // let other tasks run 
+	  taskDelay(HIGH_PRIORITY_DELAY); /* let other tasks run*/ 
 	}
-	end = 1; // Signal the other tasks to end
+	end = 1; /* Signal the other tasks to end*/
 	printf("%s\n", "Measurement finished");
 }
 
-// Utils itself
+/* Utils itself*/
 
 int timespec_subtract (	struct timespec *result,
 						struct timespec *x,
@@ -77,7 +77,7 @@ int timespec_subtract (	struct timespec *result,
 
 
 void do_work_for_some_time(int x) {
-    long int len = x * 100000000;
+    long int len = x * 10000000;
     while (len > 0) len--;
 }
 
@@ -89,6 +89,6 @@ void do_something_very_long() {
 	do_work_for_some_time(MID_PRIORITY_WORK);
 }
 
-inline int time_to_ms (struct timespec *time) {
+int time_to_ms (struct timespec *time) {
 	return time->tv_sec * 1000 + time->tv_nsec / 1000000;
 }

@@ -1,6 +1,6 @@
 #ifndef UTILS_H
 #define UTILS_H
-// Includes
+/* Includes */
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -37,6 +37,6 @@ void do_something_while_the_mutex_is_locked();
 
 void do_something_very_long();
 
-inline int time_to_ms (struct timespec *time);
+int time_to_ms (struct timespec *time);
 
-#endif // UTILS_H
+#endif /* UTILS_H */
