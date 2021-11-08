@@ -1,3 +1,15 @@
+#ifndef CONFIG_H
+#define CONFIG_H
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <time.h>
+#include <sysLib.h>
+#include <taskLib.h>
+#include <timers.h>
+#include <cpuset.h>
+
 /* config.h
  * PSR 5cache assignment
  * DO NOT MODIFY
@@ -13,7 +25,14 @@ struct elem {
   int gap[GAP];
 };
 
+unsigned longrand(long int max);
+
+
 #define MAX_ARRAY_LEN (4*1024*1024/sizeof(struct elem))
+
+struct elem global_array[MAX_ARRAY_LEN];
+
+unsigned random_indexes[MAX_ARRAY_LEN];
 
 /* Modes for `measureCache` */
 #define SEQUENTIAL 0
@@ -74,3 +93,4 @@ void ranArray(struct elem* array, int n);
  *      Measurement finished
  */
 void measureCache(int mode, int jumps);
+#endif
