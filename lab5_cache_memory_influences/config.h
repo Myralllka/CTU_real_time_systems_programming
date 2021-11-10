@@ -10,33 +10,24 @@
 #include <timers.h>
 #include <cpuset.h>
 
-/* config.h
- * PSR 5cache assignment
- * DO NOT MODIFY
- */
-
 /* sysClkRateSet(CLOCK_RATE) */
 #define CLOCK_RATE 1000
-
+#define MAX_ARRAY_LEN (4*1024*1024/sizeof(struct elem))
 #define GAP 0
+
+/* Modes for `measureCache` */
+#define SEQUENTIAL 0
+#define RANDOM 1
+
 
 struct elem {
   struct elem *next;
   int gap[GAP];
 };
 
-unsigned longrand(long int max);
-
-
-#define MAX_ARRAY_LEN (4*1024*1024/sizeof(struct elem))
-
 struct elem global_array[MAX_ARRAY_LEN];
 
-unsigned random_indexes[MAX_ARRAY_LEN];
-
-/* Modes for `measureCache` */
-#define SEQUENTIAL 0
-#define RANDOM 1
+unsigned longrand(long int max);
 
 /*
  * seqArray()
