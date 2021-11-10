@@ -54,7 +54,6 @@ unsigned measurement(struct elem* array, int jumps) {
 void measureCache(int mode, int jumps) {
 	sysClkRateSet(CLOCK_RATE);
 
-
 	unsigned i, measure_result;
 	printf("%s\n", "Measurement started");
 	for (i = 1024; i <= MAX_ARRAY_LEN; i <<= 1) {
