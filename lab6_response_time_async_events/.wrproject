@@ -6867,18 +6867,18 @@
             <stringAttribute key="BLD::Info|Tool|Assembler|flags|SIMLINUXicc_LP64_LARGE_SMP" value="$(CC_ARCH_SPEC) -ansi -fno-zero-initialized-in-bss  -xassembler-with-cpp  -MD -MP"/>
             <stringAttribute key="BLD::Info|Tool|Assembler|cmd|SIMLINUXicc_LP64_LARGE_SMP" value="echo &quot;building $@&quot;;%assemblerprefix% $(TOOL_PATH)icc %DebugModeFlags% %ToolFlags% %Defines% $(DEFINES) $(ADDED_CFLAGS) %Includes% $(ADDED_INCLUDES) -o %OutFile% -c %InFile%"/>
             <stringAttribute key="BLD::Info|redirRoot" value=""/>
-            <stringAttribute key="BLD::Info|defaultSpec" value="ARMARCH7gnu_SMP"/>
+            <stringAttribute key="BLD::Info|defaultSpec" value="SIMLINUXgnu"/>
         </mapAttribute>
     </attributes>
     <buildtargets>
-        <buildtarget buildtool="Linker" name="lab5_cache_memory_influences" passed="false" targetname="lab5_cache_memory_influences">
+        <buildtarget buildtool="Linker" name="lab6_response_time_async_events" passed="false" targetname="lab6_response_time_async_events">
             <contents>
-                <buildtargetreference name="/lab5_cache_memory_influences/lab5_cache_memory_influences_partialImage"/>
+                <buildtargetreference name="/lab6_response_time_async_events/lab6_response_time_async_events_partialImage"/>
             </contents>
         </buildtarget>
-        <buildtarget buildtool="Partial Image Linker" name="lab5_cache_memory_influences_partialImage" passed="true" targetname="lab5_cache_memory_influences_partialImage">
+        <buildtarget buildtool="Partial Image Linker" name="lab6_response_time_async_events_partialImage" passed="true" targetname="lab6_response_time_async_events_partialImage">
             <contents>
-                <folder name="/lab5_cache_memory_influences" recursive="true"/>
+                <folder name="/lab6_response_time_async_events" recursive="true"/>
             </contents>
         </buildtarget>
     </buildtargets>

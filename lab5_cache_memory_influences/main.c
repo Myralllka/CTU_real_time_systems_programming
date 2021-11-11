@@ -43,29 +43,30 @@ void ranArray(struct elem* array, int n) {
 }
 
 unsigned measurement(struct elem* array, int jumps) {
+	int counter = jumps;
 	struct elem *p = &array[0];
 	unsigned start = sysTimestamp();
-	while (--jumps) p = p->next;
+	while (--counter) p = p->next;
 	unsigned end = sysTimestamp();
 	
-	return end - start;
+	return (end - start) / jumps;
 }
 
 void measureCache(int mode, int jumps) {
 	sysClkRateSet(CLOCK_RATE);
-
+	sysTimestampEnable();
 	unsigned i, measure_result;
+	
 	printf("%s\n", "Measurement started");
-	for (i = 1024; i <= MAX_ARRAY_LEN; i <<= 1) {
+	for (i = 256; i <= MAX_ARRAY_LEN; i <<= 1) {
 		if (mode == SEQUENTIAL) {
-			ranArray(global_array, i);
+			seqArray(global_array, i);
 		} else if (mode == RANDOM) {
-			ranArray(global_array, i);		
+			ranArray(global_array, i);
 		} else return;
-		seqArray(global_array, i);
-
-		measure_result = measurement(global_array, i);
-		printf("%lu\t\t%lu\n", i, measure_result);
+		
+		measure_result = measurement(global_array, jumps);
+		printf("%lu\t\t%lu\n", i*sizeof(struct elem), measure_result);
 	}
 	printf("%s\n", "Measurement finished");
 }
