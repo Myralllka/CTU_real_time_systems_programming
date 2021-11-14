@@ -5397,6 +5397,7 @@
             <stringAttribute key="BLD::Info|Macro|LIBS|value|SIMLINUXgnu" value=""/>
             <listAttribute key="BLD::Info|Incl|SIMLINUXgnu">
                 <stringAttribute value="-I$(WIND_BASE)/target/h"/>
+                <stringAttribute value="-I$(WIND_BASE)/target/config/xlnx_zynq7k"/>
                 <stringAttribute value="-I$(WIND_BASE)/target/h/wrn/coreip"/>
             </listAttribute>
             <listAttribute key="BLD::Info|Definess|SIMLINUXgnu">
@@ -5411,7 +5412,7 @@
             <stringAttribute key="BLD::Info|Tool|C-Compiler|derivedSigs|SIMLINUXgnu" value="*.o"/>
             <stringAttribute key="BLD::Info|Tool|C-Compiler|dbgFlags|SIMLINUXgnu" value="-g"/>
             <stringAttribute key="BLD::Info|Tool|C-Compiler|nonDbgFlags|SIMLINUXgnu" value=" -O2  -fno-defer-pop"/>
-            <stringAttribute key="BLD::Info|Tool|C-Compiler|flags|SIMLINUXgnu" value="$(CC_ARCH_SPEC) -ansi -fno-zero-initialized-in-bss  -Wall    -MD -MP"/>
+            <stringAttribute key="BLD::Info|Tool|C-Compiler|flags|SIMLINUXgnu" value="$(CC_ARCH_SPEC) -fno-zero-initialized-in-bss  -Wall    -MD -MP"/>
             <stringAttribute key="BLD::Info|Tool|C-Compiler|cmd|SIMLINUXgnu" value="echo &quot;building $@&quot;;%ccompilerprefix% $(TOOL_PATH)ccpentium %DebugModeFlags% %ToolFlags% %Defines% $(DEFINES) $(ADDED_CFLAGS) %Includes% $(ADDED_INCLUDES) -o %OutFile% -c %InFile%"/>
             <stringAttribute key="BLD::Info|Tool|C++-Compiler|derivedSigs|SIMLINUXgnu" value="*.o"/>
             <stringAttribute key="BLD::Info|Tool|C++-Compiler|dbgFlags|SIMLINUXgnu" value="-g"/>

@@ -2,7 +2,7 @@
  * PSR 6schedlat assignment
  * DO NOT MODIFY
  */
-#ifndef GONFIG_H
+#ifndef CONFIG_H
 #define CONFIG_H
 #include <stdlib.h>
 #include <stdio.h>
@@ -12,6 +12,8 @@
 #include <taskLib.h>
 #include <timers.h>
 #include <cpuset.h>
+#include <intLib.h>
+#include <iv.h>
 #include <xlnx_zynq7k.h>
 
 // Register offsets (see TRM B.32)
@@ -38,6 +40,7 @@
 
 /* sysClkRateSet(CLOCK_RATE) */
 #define CLOCK_RATE 1000
+#define TIM_MAX 10000
 
 /* Semaphore that is passed between `timer_isr` and Service task. */
 SEM_ID isr_semaphore;
