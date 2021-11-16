@@ -31,7 +31,7 @@ void timer_isr(void) {
  *  value is read and stored.
  */
 void ServiceTask(int o) {
-
+	
 }
 
 /*
@@ -102,7 +102,7 @@ void MonitorTask(int o) {
  */
 
 void CreateTasks(int measurements) {
-	
+	sysClkRateSet(CLOCK_RATE);
 	
 		
 	taskSpawn("tService", 210, 0, 4096, (FUNCPTR) ServiceTask, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
