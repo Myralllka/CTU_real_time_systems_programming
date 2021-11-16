@@ -41,9 +41,7 @@
 /* sysClkRateSet(CLOCK_RATE) */
 #define CLOCK_RATE 1000
 #define TIM_MAX 10000
-
-/* Semaphore that is passed between `timer_isr` and Service task. */
-SEM_ID isr_semaphore;
+#define BREAK_TIME 50
 
 /*
  * timer_isr()

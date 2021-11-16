@@ -1,5 +1,21 @@
 #include "config.h"
 
+/* Semaphore that is passed between `timer_isr` and Service task. */
+SEM_ID isr_semaphore;
+unsigned tim_value_isr = 0;
+unsigned tim_value_service = 0;
+
+int m_end = 0;
+
+void int_enable() {
+	TTC0_TIMER2_COUNTER_CTRL = CTRL_INT | CTRL_EN;
+	intEnable(INT_LVL_TTC0_2);
+}
+
+void int_disable() {
+	TTC0_TIMER2_COUNTER_CTRL = CTRL_DIS;
+	intDisable(INT_LVL_TTC0_2);
+}
 
 /*
  * timer_isr()
@@ -9,14 +25,13 @@
  *  and releases `isr_semaphore`.
  */
 void timer_isr(void) {
-	// timer init (see TRM 8.5.5)
-	TTC0_TIMER2_COUNTER_CTRL = CTRL_DIS;
-	TTC0_TIMER2_CLOCK_CTRL = CLOCK_PRESCALE | CLOCK_PRESCALE_EN;
-	TTC0_TIMER2_INTERVAL = TIM_MAX; // See "Choosing the timer period" below
-	TTC0_TIMER2_INTERRUPT_EN = INTERRUPT_EN_IV;
-	TTC0_TIMER2_COUNTER_CTRL = CTRL_INT | CTRL_EN;
+	int_disable();
+	
+	semGive(isr_semaphore);
 	// read ISR register to clear interrupt (see TRM B.32)
 	TTC0_TIMER2_INTERRUPT;
+	tim_value_service = TTC0_TIMER2_COUNTER_VAL;
+	int_enable();
 }
 
 
@@ -31,7 +46,10 @@ void timer_isr(void) {
  *  value is read and stored.
  */
 void ServiceTask(int o) {
-	
+	while (! m_end) {
+		semTake(isr_semaphore, WAIT_FOREVER);
+		tim_value_service = TTC0_TIMER2_COUNTER_VAL;		
+	}
 }
 
 /*
@@ -55,8 +73,18 @@ void ServiceTask(int o) {
  *      same as the second row.
  *   Printed out values are delimited by comma ',' only. Rows are ended with '\n'.
  */
-void MonitorTask(int o) {
-
+void MonitorTask(int measurements) {
+	int i = 0;
+	for (i = 0; i < measurements; ++i) {
+		printf("%s\n", "Measurement started");
+		// delay for 1 sec
+		printf("%s\n", "Measurement finished");
+		taskDelay(BREAK_TIME);
+	}
+	m_end = 1;
+	
+	int_disable();
+	intDisconnect((VOIDFUNCPTR *) INT_VEC_TTC0_2, timer_isr, 0);
 }
 
 /*
@@ -101,10 +129,22 @@ void MonitorTask(int o) {
  *      Measurement finished
  */
 
-void CreateTasks(int measurements) {
+void CreateTasks(int seconds) {
 	sysClkRateSet(CLOCK_RATE);
 	
-		
-	taskSpawn("tService", 210, 0, 4096, (FUNCPTR) ServiceTask, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-	taskSpawn("tMonitor", 210, 0, 4096, (FUNCPTR) MonitorTask, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+	isr_semaphore = semMCreate(SEM_INVERSION_SAFE|SEM_Q_PRIORITY);
+	// timer init (see TRM 8.5.5)
+	TTC0_TIMER2_COUNTER_CTRL = CTRL_DIS;
+	TTC0_TIMER2_CLOCK_CTRL = CLOCK_PRESCALE | CLOCK_PRESCALE_EN;
+	TTC0_TIMER2_INTERVAL = TIM_MAX; // See "Choosing the timer period" below
+	TTC0_TIMER2_INTERRUPT_EN = INTERRUPT_EN_IV;
+	
+	int_enable();
+	intConnect((VOIDFUNCPTR *) INT_VEC_TTC0_2, timer_isr, 0);
+	
+	int service = taskSpawn("tService", 210, 0, 4096, (FUNCPTR) ServiceTask, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+	int monitor = taskSpawn("tMonitor", 210, 0, 4096, (FUNCPTR) MonitorTask, seconds, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+	
+	taskDelete(service);
+	taskDelete(monitor);
 }
