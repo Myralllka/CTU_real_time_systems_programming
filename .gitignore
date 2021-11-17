@@ -3,7 +3,7 @@ RemoteSystemsTempFiles/
 *SIMLINUXgnu/
 *SIMLINUXgnu_RTP/
 *SIMPENTIUMgnu_RTP/
-*ARMARCHgnu_SMP/
+*ARMARCH7gnu_SMP/
 *.zip
 *.tar.gz
 *.tar.xz
