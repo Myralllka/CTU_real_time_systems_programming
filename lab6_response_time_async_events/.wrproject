@@ -3201,6 +3201,7 @@
             <stringAttribute key="BLD::Info|Macro|LIBS|value|ARMARCH7gnu_SMP" value=""/>
             <listAttribute key="BLD::Info|Incl|ARMARCH7gnu_SMP">
                 <stringAttribute value="-I$(WIND_BASE)/target/h"/>
+                <stringAttribute value="-I$(WIND_BASE)/target/config/xlnx_zynq7k"/>
                 <stringAttribute value="-I$(WIND_BASE)/target/h/wrn/coreip"/>
             </listAttribute>
             <listAttribute key="BLD::Info|Definess|ARMARCH7gnu_SMP">
@@ -3219,7 +3220,7 @@
             <stringAttribute key="BLD::Info|Tool|C-Compiler|derivedSigs|ARMARCH7gnu_SMP" value="*.o"/>
             <stringAttribute key="BLD::Info|Tool|C-Compiler|dbgFlags|ARMARCH7gnu_SMP" value="-g"/>
             <stringAttribute key="BLD::Info|Tool|C-Compiler|nonDbgFlags|ARMARCH7gnu_SMP" value=" -O2 "/>
-            <stringAttribute key="BLD::Info|Tool|C-Compiler|flags|ARMARCH7gnu_SMP" value="$(CC_ARCH_SPEC) -ansi -fno-zero-initialized-in-bss  -Wall    -MD -MP"/>
+            <stringAttribute key="BLD::Info|Tool|C-Compiler|flags|ARMARCH7gnu_SMP" value="$(CC_ARCH_SPEC) -fno-zero-initialized-in-bss  -Wall    -MD -MP"/>
             <stringAttribute key="BLD::Info|Tool|C-Compiler|cmd|ARMARCH7gnu_SMP" value="echo &quot;building $@&quot;;%ccompilerprefix% $(TOOL_PATH)ccarm %DebugModeFlags% %ToolFlags% %Defines% $(DEFINES) $(ADDED_CFLAGS) %Includes% $(ADDED_INCLUDES) -o %OutFile% -c %InFile%"/>
             <stringAttribute key="BLD::Info|Tool|C++-Compiler|derivedSigs|ARMARCH7gnu_SMP" value="*.o"/>
             <stringAttribute key="BLD::Info|Tool|C++-Compiler|dbgFlags|ARMARCH7gnu_SMP" value="-g"/>
@@ -6868,7 +6869,7 @@
             <stringAttribute key="BLD::Info|Tool|Assembler|flags|SIMLINUXicc_LP64_LARGE_SMP" value="$(CC_ARCH_SPEC) -ansi -fno-zero-initialized-in-bss  -xassembler-with-cpp  -MD -MP"/>
             <stringAttribute key="BLD::Info|Tool|Assembler|cmd|SIMLINUXicc_LP64_LARGE_SMP" value="echo &quot;building $@&quot;;%assemblerprefix% $(TOOL_PATH)icc %DebugModeFlags% %ToolFlags% %Defines% $(DEFINES) $(ADDED_CFLAGS) %Includes% $(ADDED_INCLUDES) -o %OutFile% -c %InFile%"/>
             <stringAttribute key="BLD::Info|redirRoot" value=""/>
-            <stringAttribute key="BLD::Info|defaultSpec" value="SIMLINUXgnu"/>
+            <stringAttribute key="BLD::Info|defaultSpec" value="ARMARCH7gnu_SMP"/>
         </mapAttribute>
     </attributes>
     <buildtargets>

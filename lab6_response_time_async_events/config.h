@@ -41,7 +41,7 @@
 /* sysClkRateSet(CLOCK_RATE) */
 #define CLOCK_RATE 1000
 #define TIM_MAX 10000
-#define BREAK_TIME 50
+#define BREAK_TIME 1000
 
 /*
  * timer_isr()

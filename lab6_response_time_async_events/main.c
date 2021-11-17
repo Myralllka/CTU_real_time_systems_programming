@@ -1,21 +1,13 @@
 #include "config.h"
 
+#define TIME_MAP_SIZE 20
 /* Semaphore that is passed between `timer_isr` and Service task. */
 SEM_ID isr_semaphore;
-unsigned tim_value_isr = 0;
-unsigned tim_value_service = 0;
 
 int m_end = 0;
+uint32_t m_time_isr_map[TIME_MAP_SIZE];
+uint32_t m_time_srv_map[TIME_MAP_SIZE];
 
-void int_enable() {
-	TTC0_TIMER2_COUNTER_CTRL = CTRL_INT | CTRL_EN;
-	intEnable(INT_LVL_TTC0_2);
-}
-
-void int_disable() {
-	TTC0_TIMER2_COUNTER_CTRL = CTRL_DIS;
-	intDisable(INT_LVL_TTC0_2);
-}
 
 /*
  * timer_isr()
@@ -25,13 +17,14 @@ void int_disable() {
  *  and releases `isr_semaphore`.
  */
 void timer_isr(void) {
-	int_disable();
-	
+	// m_tim_value_service =  TTC0_TIMER2_COUNTER_VAL * 36ns / 1000 (ms)
+	uint32_t time = (TTC0_TIMER2_COUNTER_VAL * 36) / 1000;
+	if (time < TIME_MAP_SIZE) ++m_time_isr_map[time];
 	semGive(isr_semaphore);
+	
 	// read ISR register to clear interrupt (see TRM B.32)
 	TTC0_TIMER2_INTERRUPT;
-	tim_value_service = TTC0_TIMER2_COUNTER_VAL;
-	int_enable();
+
 }
 
 
@@ -48,7 +41,8 @@ void timer_isr(void) {
 void ServiceTask(int o) {
 	while (! m_end) {
 		semTake(isr_semaphore, WAIT_FOREVER);
-		tim_value_service = TTC0_TIMER2_COUNTER_VAL;		
+		uint32_t time = (TTC0_TIMER2_COUNTER_VAL * 36) / 1000;
+		if (time < TIME_MAP_SIZE) ++m_time_srv_map[time];
 	}
 }
 
@@ -74,17 +68,39 @@ void ServiceTask(int o) {
  *   Printed out values are delimited by comma ',' only. Rows are ended with '\n'.
  */
 void MonitorTask(int measurements) {
-	int i = 0;
-	for (i = 0; i < measurements; ++i) {
-		printf("%s\n", "Measurement started");
+	int i = 0, j;
+	printf("%s\n", "Measurement started");
+//	for (i = 0; i < measurements; ++i) {
+	while (measurements == 0 || measurements != i) {
 		// delay for 1 sec
-		printf("%s\n", "Measurement finished");
 		taskDelay(BREAK_TIME);
+		char c;
+		for (j = 0; j < TIME_MAP_SIZE; ++j) {
+			printf("%i", j);
+			c = (j + 1 == TIME_MAP_SIZE) ? '\n' : ',';
+			printf("%c", c);
+		}
+		for (j = 0; j < TIME_MAP_SIZE; ++j) {
+			printf("%i", m_time_isr_map[j]);
+			c = (j + 1 == TIME_MAP_SIZE) ? '\n' : ',';
+			printf("%c", c);
+		}
+		for (j = 0; j < TIME_MAP_SIZE; ++j) {
+			printf("%i", m_time_srv_map[j]);
+			c = (j + 1 == TIME_MAP_SIZE) ? '\n' : ',';
+			printf("%c", c);
+		}
+		++i;
+
 	}
+	printf("%s\n", "Measurement finished");
+	
 	m_end = 1;
 	
-	int_disable();
+	TTC0_TIMER2_COUNTER_CTRL = CTRL_DIS;
+	intDisable(INT_LVL_TTC0_2);
 	intDisconnect((VOIDFUNCPTR *) INT_VEC_TTC0_2, timer_isr, 0);
+	
 }
 
 /*
@@ -129,22 +145,28 @@ void MonitorTask(int measurements) {
  *      Measurement finished
  */
 
-void CreateTasks(int seconds) {
+void CreateTasks(int measurements) {
 	sysClkRateSet(CLOCK_RATE);
+	int j;
+	for (j = 0; j < TIME_MAP_SIZE; ++j) {
+		m_time_srv_map[j] = 0;
+		m_time_isr_map[j] = 0;
+	}
 	
-	isr_semaphore = semMCreate(SEM_INVERSION_SAFE|SEM_Q_PRIORITY);
+	isr_semaphore = semCCreate(0, 0);
 	// timer init (see TRM 8.5.5)
 	TTC0_TIMER2_COUNTER_CTRL = CTRL_DIS;
 	TTC0_TIMER2_CLOCK_CTRL = CLOCK_PRESCALE | CLOCK_PRESCALE_EN;
 	TTC0_TIMER2_INTERVAL = TIM_MAX; // See "Choosing the timer period" below
 	TTC0_TIMER2_INTERRUPT_EN = INTERRUPT_EN_IV;
-	
-	int_enable();
+
+	TTC0_TIMER2_COUNTER_CTRL = CTRL_INT | CTRL_EN;
+
 	intConnect((VOIDFUNCPTR *) INT_VEC_TTC0_2, timer_isr, 0);
+	intEnable(INT_LVL_TTC0_2);
 	
-	int service = taskSpawn("tService", 210, 0, 4096, (FUNCPTR) ServiceTask, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-	int monitor = taskSpawn("tMonitor", 210, 0, 4096, (FUNCPTR) MonitorTask, seconds, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-	
-	taskDelete(service);
-	taskDelete(monitor);
+	int srv = taskSpawn("tService", 210, 0, 4096, (FUNCPTR) ServiceTask, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+	taskSpawn("tMonitor", 210, 0, 4096, (FUNCPTR) MonitorTask, measurements, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+	while(!m_end){};
+	taskDelete(srv);
 }
