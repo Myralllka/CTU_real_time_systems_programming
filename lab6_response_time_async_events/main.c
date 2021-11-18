@@ -4,7 +4,7 @@
 /* Semaphore that is passed between `timer_isr` and Service task. */
 SEM_ID isr_semaphore;
 
-int m_end = 0;
+int m_end;
 uint32_t m_time_isr_map[TIME_MAP_SIZE];
 uint32_t m_time_srv_map[TIME_MAP_SIZE];
 
@@ -97,10 +97,6 @@ void MonitorTask(int measurements) {
 	
 	m_end = 1;
 	
-	TTC0_TIMER2_COUNTER_CTRL = CTRL_DIS;
-	intDisable(INT_LVL_TTC0_2);
-	intDisconnect((VOIDFUNCPTR *) INT_VEC_TTC0_2, timer_isr, 0);
-	
 }
 
 /*
@@ -148,6 +144,7 @@ void MonitorTask(int measurements) {
 void CreateTasks(int measurements) {
 	sysClkRateSet(CLOCK_RATE);
 	int j;
+	m_end = 0;
 	for (j = 0; j < TIME_MAP_SIZE; ++j) {
 		m_time_srv_map[j] = 0;
 		m_time_isr_map[j] = 0;
@@ -166,7 +163,12 @@ void CreateTasks(int measurements) {
 	intEnable(INT_LVL_TTC0_2);
 	
 	int srv = taskSpawn("tService", 210, 0, 4096, (FUNCPTR) ServiceTask, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-	taskSpawn("tMonitor", 210, 0, 4096, (FUNCPTR) MonitorTask, measurements, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+	taskSpawn("tMonitor", 212, 0, 4096, (FUNCPTR) MonitorTask, measurements, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 	while(!m_end){};
+
+	TTC0_TIMER2_COUNTER_CTRL = CTRL_DIS;
+	intDisable(INT_LVL_TTC0_2);
+	intDisconnect((VOIDFUNCPTR *) INT_VEC_TTC0_2, timer_isr, 0);
+	
 	taskDelete(srv);
 }
