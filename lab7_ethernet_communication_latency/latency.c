@@ -1,3 +1,5 @@
+#include <config.h>
+
 /*
  * udp_latency()
  *  : (char *) ip_address  -- IPv4 address of the target board for sending data to
@@ -44,4 +46,83 @@
  *      0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,1,2
  *      Measurement finished
  */
-void udp_latency(char * ip_address, int port, int payload_size, int messages_count);
+void udp_latency(char * ip_address, int port, int payload_size, int messages_count) {
+	// to measure with high resolution:
+	// unsigned t = sysTimestamp();
+	
+}
+
+void listener(uint16_t port){
+  int sockd;
+  struct sockaddr_in my_name, cli_name;
+  char buf[MAX_BUF];
+  int status;
+  int addrlen;
+
+  /* Create a UDP socket */
+  sockd = socket(AF_INET, SOCK_DGRAM, 0);
+  if (sockd == -1)
+  {
+    perror("Socket creation error");
+    exit(1);
+  }
+
+  /* Configure server address */
+  my_name.sin_family = AF_INET;
+  my_name.sin_addr.s_addr = INADDR_ANY;
+  my_name.sin_port = htons(port);
+
+  status = bind(sockd, (struct sockaddr*)&my_name, sizeof(my_name));
+
+  addrlen = sizeof(cli_name);
+  status = recvfrom(sockd, buf, MAX_BUF, 0,
+      (struct sockaddr*)&cli_name, &addrlen);
+
+  printf("%s", buf);
+  strcat(buf, "OK!\n");
+
+  status = sendto(sockd, buf, strlen(buf)+1, 0,
+      (struct sockaddr*)&cli_name, sizeof(cli_name));
+
+  close(sockd);
+}
+
+void transmitter(const char *address, uint16_t port) {
+  int sockd;
+  struct sockaddr_in my_addr, srv_addr;
+  char buf[MAX_BUF];
+  int count;
+  int addrlen;
+
+  /* Create a UDP socket */
+  sockd = socket(AF_INET, SOCK_DGRAM, 0);
+  if (sockd == -1)
+  {
+    perror("Socket creation error");
+    exit(1);
+  }
+
+  /* Configure client address */
+  my_addr.sin_family = AF_INET;
+  my_addr.sin_addr.s_addr = INADDR_ANY;
+  my_addr.sin_port = 0;
+
+  bind(sockd, (struct sockaddr*)&my_addr, sizeof(my_addr));
+
+  strcpy(buf, "Hello world\n");
+
+  /* Set server address */
+  srv_addr.sin_family = AF_INET;
+  inet_aton(addrests, &srv_addr.sin_addr);
+  srv_addr.sin_port = htons(port);
+
+  sendto(sockd, buf, strlen(buf)+1, 0,
+      (struct sockaddr*)&srv_addr, sizeof(srv_addr));
+
+  addrlen = sizeof(srv_addr);
+  count = recvfrom(sockd, buf, MAX_BUF, 0,
+      (struct sockaddr*)&srv_addr, &addrlen);
+  write(1, buf, count);
+
+  close(sockd);
+}
