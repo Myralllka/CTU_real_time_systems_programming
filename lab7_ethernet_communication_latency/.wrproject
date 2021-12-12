@@ -3219,7 +3219,7 @@
             <stringAttribute key="BLD::Info|Tool|C-Compiler|derivedSigs|ARMARCH7gnu_SMP" value="*.o"/>
             <stringAttribute key="BLD::Info|Tool|C-Compiler|dbgFlags|ARMARCH7gnu_SMP" value="-g"/>
             <stringAttribute key="BLD::Info|Tool|C-Compiler|nonDbgFlags|ARMARCH7gnu_SMP" value=" -O2 "/>
-            <stringAttribute key="BLD::Info|Tool|C-Compiler|flags|ARMARCH7gnu_SMP" value="$(CC_ARCH_SPEC) -ansi -fno-zero-initialized-in-bss  -Wall    -MD -MP"/>
+            <stringAttribute key="BLD::Info|Tool|C-Compiler|flags|ARMARCH7gnu_SMP" value="$(CC_ARCH_SPEC) -fno-zero-initialized-in-bss  -Wall    -MD -MP"/>
             <stringAttribute key="BLD::Info|Tool|C-Compiler|cmd|ARMARCH7gnu_SMP" value="echo &quot;building $@&quot;;%ccompilerprefix% $(TOOL_PATH)ccarm %DebugModeFlags% %ToolFlags% %Defines% $(DEFINES) $(ADDED_CFLAGS) %Includes% $(ADDED_INCLUDES) -o %OutFile% -c %InFile%"/>
             <stringAttribute key="BLD::Info|Tool|C++-Compiler|derivedSigs|ARMARCH7gnu_SMP" value="*.o"/>
             <stringAttribute key="BLD::Info|Tool|C++-Compiler|dbgFlags|ARMARCH7gnu_SMP" value="-g"/>
