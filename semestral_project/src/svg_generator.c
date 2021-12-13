@@ -4,6 +4,7 @@
 // Based on https://github.com/memononen/nanosvg
 //
 // reduced number of functions + rewritten everything to avoid dynamic memory allocations
+// Also documentation is written by us (Denys and Mykola)
 
 /*!
  * \brief Write html + svg plots to the file
@@ -12,82 +13,112 @@
  * It will display 3 plots:
  * 		Actual motor position (absolute value)
  * 		Desire motor position (absolute value)
- * 		Pwm duty cicle (+- 100%)
+ * 		Pwm duty cycle (+- 100%)
  * 		
  * The graphs should show at least 2 seconds of history with time resolution ≤ 5 ms.
+ *
  * @param desc : FILE* - file descriptor
  */
-void generate_html_file(FILE* f) {
-	float x_actual[HISTORY_SIZE];
-	float y_actual[HISTORY_SIZE];
-	float y_desired[HISTORY_SIZE];
-	float y_pwm[HISTORY_SIZE];
-	int i;
-	uint32_t s = motor_history.array_start_index;
-//	int x_value = motor_history.counter;
-	int x_value = 0;
-	int copy_array_idx = 0;
-	for (i = s; i != (s + HISTORY_SIZE) % HISTORY_CYCLIC_ARRAY_SIZE; i = (i + 1) % HISTORY_CYCLIC_ARRAY_SIZE, copy_array_idx++) {
-		printf("(%d, %d), ", i, (s + HISTORY_SIZE) % HISTORY_CYCLIC_ARRAY_SIZE);
-		y_desired[copy_array_idx] = (float) motor_history.desired_position[i];
-		y_actual[copy_array_idx] = (float) motor_history.position[i];
-		y_pwm[copy_array_idx] = (float) motor_history.pwm_duty[i];
-		
-		x_actual[copy_array_idx] = (float)(x_value++);
-		
-	}
-	printf("\n");
-	
-//    FILE *f;
-//    f = fopen(filename, "w");       /*Open result file*/
-    /* open html teg-s*/
-    fprintf(f, "<!DOCTYPE html>\n<html>\n<body>\n");
-    /* Plot graphic with red (#ff0000) lines as svg image only */
+void generate_html_file(FILE *f) {
+    float x_actual[HISTORY_SIZE];
+    float y_actual[HISTORY_SIZE];
+    float y_desired[HISTORY_SIZE];
+    float y_pwm[HISTORY_SIZE];
+    int i;
+    uint32_t s = motor_history.array_start_index;
+    int copy_array_idx = 0;
+    for (i = s; i != (s + HISTORY_SIZE) % HISTORY_CYCLIC_ARRAY_SIZE; i = (i + 1) %
+                                                                         HISTORY_CYCLIC_ARRAY_SIZE, copy_array_idx++) {
+        y_desired[copy_array_idx] = (float) motor_history.desired_position[i];
+        y_actual[copy_array_idx] = (float) motor_history.position[i];
+        y_pwm[copy_array_idx] = (float) motor_history.pwm_duty[i];
+
+        x_actual[copy_array_idx] = (float) motor_history.timestamp[i];
+    }
+
     // creating svg part
-    fprintf(f, "<p>\n Actual motor position (absolute value)</p>\n");
     svg_draw_to_file_xy(f, "#ff0000", x_actual, y_actual, HISTORY_SIZE, "t", "Actual position (abs units)");
-    fprintf(f, "<p>\n Requested motor position (absolute value)</p>\n");
     svg_draw_to_file_xy(f, "#00ff00", x_actual, y_desired, HISTORY_SIZE, "t", "Desired position (abs units)");
-    fprintf(f, "<p>\n Current PWM duty cycle +-100% </p>\n");
     svg_draw_to_file_xy(f, "#0000ff", x_actual, y_pwm, HISTORY_SIZE, "t", "PWM duty cicle, +-100%");
-    
-    /* close html teg-s*/
-    fprintf(f, "</body>\n</html>");
-//    fclose(f);
 }
 
-void svg_finish(svg_context *ctx) {
-    fprintf(ctx->f, "</svg>");
-}
-
+/*!
+ * open svg tag
+ * @param ctx - pointer to main svg context data structure
+ * @param name - opening tag's name
+ * @param use_opt - 1 if there are some options in opening tag or not, 0 otherwise
+ */
 void svg_tag_start(svg_context *ctx, const char *name, int use_opt) {
     fprintf(ctx->f, "\n<%s %s", name, (use_opt ? " " : ">"));
 }
 
+/*!
+ * add svg closing tag
+ * @param ctx - pointer to main svg context data structure
+ */
+void svg_finish(svg_context *ctx) {
+    fprintf(ctx->f, "</svg>");
+}
+
+/*!
+ * add end tag symbol
+ * @param ctx - pointer to main svg context data structure
+ * @param selfclose - 1 if tag is self closing, 0 otherwise
+ */
 void svg_opt_end(svg_context *ctx, int selfclose) {
     fprintf(ctx->f, " %s>\n", (selfclose ? "/" : ""));
 }
 
+/*!
+ * add float option to svg tag
+ * @param ctx - pointer to main svg context data structure
+ * @param key - option name
+ * @param v - option value
+ */
 void svg_optf(svg_context *ctx, const char *key, float v) {
     fprintf(ctx->f, "%s=\"%f\" ", key, v);
 }
 
+/*!
+ * add int option to svg tag
+ * @param ctx - pointer to main svg context data structure
+ * @param key - option name
+ * @param v - option value
+ */
 void svg_opti(svg_context *ctx, const char *key, int v) {
     fprintf(ctx->f, "%s=\"%i\" ", key, v);
 }
 
+/*!
+ * add string option to svg tag
+ * @param ctx - pointer to main svg context data structure
+ * @param key - option name
+ * @param v - option value
+ */
 void svg_opta(svg_context *ctx, const char *key, const char *v) {
     fprintf(ctx->f, "%s=\"%s\" ", key, v);
 }
 
+/*!
+ * add fill option to svg tag (using fill_color option from ctx)
+ * @param ctx - pointer to main svg context data structure
+ */
 void svg_opt_fill(svg_context *ctx) {
     fprintf(ctx->f, "fill=\"%s\" ", ctx->fill_color);
 }
 
+/*!
+ * add fill=none option to svg tag
+ * @param ctx - pointer to main svg context data structure
+ */
 void svg_opt_fill_none(svg_context *ctx) {
     fprintf(ctx->f, "fill=\"none\" ");
 }
 
+/*!
+ * add svg 'stroke' tag of ctx->stroke_color with ctx->stroke_width and ctx->dash_array
+ * @param ctx - pointer to main svg context data structure
+ */
 void svg_opt_stroke(svg_context *ctx) {
     fprintf(ctx->f, "stroke=\"%s\" stroke-width=\"%i\" stroke-dasharray=\"%s\" ",
             ctx->stroke_color,
@@ -95,30 +126,71 @@ void svg_opt_stroke(svg_context *ctx) {
             ctx->dash_array);
 }
 
+/*!
+ * open a long option svg tag
+ * @param ctx - pointer to main svg context data structure
+ * @param key - option name
+ */
 void svg_opt_long_beg(svg_context *ctx, const char *key) {
     fprintf(ctx->f, "%s=\"", key);
 }
 
+/*!
+ * close a long option svg tag
+ * @param ctx - pointer to main svg context data structure
+ */
 void svg_opt_long_end(svg_context *ctx) {
     fprintf(ctx->f, "\" ");
 }
 
+/*!
+ * Add x and y rotation to svg tag
+ * @param ctx - pointer to main svg context data structure
+ * @param angle - rotation angle
+ * @param cx - rotation in x coor, px
+ * @param cy - rotation in y coor, px
+ */
 void svg_rotate(svg_context *ctx, int angle, int cx, int cy) {
     fprintf(ctx->f, "translate(%i,%i) rotate(%i) translate(%i,%i) ", cx, cy, angle, -cx, -cy);
 }
 
+/*!
+ * Add x and y translations to svg tag
+ * @param ctx - pointer to main svg context data structure
+ * @param dx - translation in x coor, px
+ * @param dy - translation in y coor, px
+ */
 void svg_translate(svg_context *ctx, int dx, int dy) {
     fprintf(ctx->f, "translate(%i,%i) ", dx, dy);
 }
 
+/*!
+ * Add x and y scaling to svg tag
+ * @param ctx - pointer to main svg context data structure
+ * @param sx - x scaling coefficient
+ * @param sy - y scaling coefficient
+ */
 void svg_scale(svg_context *ctx, float sx, float sy) {
     fprintf(ctx->f, "scale(%f,%f) ", sx, sy);
 }
 
+/*!
+ * Close the svg tag
+ * @param ctx - pointer to main svg context data structure
+ * @param name - pointer to the name of the tag to be closed
+ */
 void svg_tag_end(svg_context *ctx, const char *name) {
     fprintf(ctx->f, "\n</%s>", name);
 }
 
+/*!
+ * Add a line to svg
+ * @param ctx - pointer to main svg context data structure
+ * @param x1 - x coor of position where to put object (beginning)
+ * @param y1 - y coor of position where to put object (beginning)
+ * @param x2 - x coor of position where to put object (end)
+ * @param y2 - y coor of position where to put object (end)
+ */
 void svg_line(svg_context *ctx, float x1, float y1, float x2, float y2) {
     svg_tag_start(ctx, "line", 1);
     {
@@ -131,6 +203,14 @@ void svg_line(svg_context *ctx, float x1, float y1, float x2, float y2) {
     svg_opt_end(ctx, 1);
 }
 
+/*!
+ * Add an arrow to svg
+ * @param ctx - pointer to main svg context data structure
+ * @param x1 - x coor of position where to put object (beginning)
+ * @param y1 - y coor of position where to put object (beginning)
+ * @param x2 - x coor of position where to put object (end)
+ * @param y2 - y coor of position where to put object (end)
+ */
 void svg_arrow(svg_context *ctx, float x1, float y1, float x2, float y2) {
     svg_tag_start(ctx, "line", 1);
     {
@@ -144,6 +224,13 @@ void svg_arrow(svg_context *ctx, float x1, float y1, float x2, float y2) {
     svg_opt_end(ctx, 1);
 }
 
+/*!
+ *
+ * @param ctx - pointer to main svg context data structure
+ * @param x - x coor of position where to put object
+ * @param y - y coor of position where to put object
+ * @param count
+ */
 void svg_path_data(svg_context *ctx, const float *x, const float *y, size_t count) {
     size_t i;
     svg_tag_start(ctx, "path", 1);
@@ -159,6 +246,14 @@ void svg_path_data(svg_context *ctx, const float *x, const float *y, size_t coun
     svg_opt_end(ctx, 1);
 }
 
+/*!
+ * Add rectangle to svg
+ * @param ctx - pointer to main svg context data structure
+ * @param x - x coor of position where to put object
+ * @param y - y coor of position where to put object
+ * @param w - width of the object, in px
+ * @param h - height of the object, in px
+ */
 void svg_rect(svg_context *ctx, float x, float y, float w, float h) {
     svg_tag_start(ctx, "rect", 1);
     svg_optf(ctx, "x", cordx(x));
@@ -170,6 +265,13 @@ void svg_rect(svg_context *ctx, float x, float y, float w, float h) {
     svg_opt_end(ctx, 1);
 }
 
+/*!
+ * Add text to svg
+ * @param ctx - pointer to main svg context data structure
+ * @param txt - pointer to text to put it on the svg
+ * @param x - x coor of position where to put text
+ * @param y - y coor of position where to put text
+ */
 void svg_text(svg_context *ctx, const char *txt, float x, float y) {
     svg_tag_start(ctx, "text", 1);
     svg_optf(ctx, "x", cordx(x));
@@ -195,6 +297,13 @@ void svg_set_stroke(svg_context *ctx, const char *color) {
     strcpy(ctx->stroke_color, color);
 }
 
+/*!
+ * find min and max of an array
+ * @param data float array
+ * @param min pointer where to put min
+ * @param max pointer where to put max
+ * @param count size of an array
+ */
 void max_min(const float *data, float *min, float *max, size_t count) {
     size_t i;
     for (i = 0; i < count; ++i)
@@ -207,11 +316,21 @@ void max_min(const float *data, float *min, float *max, size_t count) {
             *max = data[i];
 }
 
+/**
+ * Plot x-y data to SVG file
+ * @param f opened file for writing
+ * @param color line color
+ * @param y data values
+ * @param x ordered x values from min to max
+ * @param count elements count
+ * @param x_label label for Ax
+ * @param y_label label for Ay
+ */
 void svg_draw_to_file_xy(FILE *f,
-                              const char *color,
-                              float *x, float *y,
-                              size_t count,
-                              const char *x_label, const char *y_label) {
+                         const char *color,
+                         float *x, float *y,
+                         size_t count,
+                         const char *x_label, const char *y_label) {
     float min_y, min_x, max_y, max_x;
     float height, width, t;
     float mx, my;
@@ -232,8 +351,8 @@ void svg_draw_to_file_xy(FILE *f,
             .stroke = 1,
             .fill = 0,
             .f = f,
-            .width = 800,
-            .height = 600,
+            .width = PLOT_WIDTH,
+            .height = PLOT_HEIGHT,
             .padding = 50,
             .flip = 1,
             .mx = 1,
@@ -263,7 +382,7 @@ void svg_draw_to_file_xy(FILE *f,
     svg_set_stroke(ctx, "#aaaaaa");
 
     ctx->stroke_width = 1;
-    for (t = min_x + width / 10; t / max_x < 0.96; t = t + width / 10) {
+    for (t = min_x + width / 10; t < max_x; t = t + width / 10) {
         tx = (t - min_x) * mx + (float) ctx->padding;
 
         svg_set_dash(ctx, "5,5");
@@ -286,7 +405,7 @@ void svg_draw_to_file_xy(FILE *f,
     svg_set_stroke(ctx, "#aaaaaa");
 
     ctx->stroke_width = 1;
-    for (t = min_y + height / 10; t / max_y < 0.96; t = t + height / 10.0) {
+    for (t = min_y + height / 10; t < max_y; t = t + height / 10.0) {
         ty = (float) ctx->height - (t - min_y) * my - (float) ctx->padding;
         svg_set_dash(ctx, "5,5");
         svg_line(ctx, (float) ctx->padding, ty, (float) (ctx->width - ctx->padding), ty);

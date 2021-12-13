@@ -1,7 +1,8 @@
 #ifndef STEPPER_MOTOR_H
 #define STEPPER_MOTOR_H
+
 #include <stdbool.h>
- 
+
 #define REGISTER(base, offs) (*((volatile UINT32 *)((base) + (offs))))
 #define BIT(i) ((1) << (i))
 #define PWM_PERIOD 5000 // Corresponds to 20kHz fewquency

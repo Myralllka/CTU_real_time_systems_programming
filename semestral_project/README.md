@@ -1,35 +1,45 @@
 # CTU_RTSP_term_project
-## TODO: add description here
 
-### Tasks structure 
-![Structure drawio](https://user-images.githubusercontent.com/35429810/145201530-005b390d-ce5f-4674-87a6-57b0b9ad7077.png)
+[assignment page link](https://wiki.control.fel.cvut.cz/psr/cviceni/semestralka/)
 
-## UDP communication package structure
-| Type | Bytes | Description |
-| ---- | ----- | ----------- | 
-| uint32 | 4 | Motor desired absolute position |
+### Team
 
-## Tasks workflow:
-### Driver
-#### If in listener mode
-* When interrupt comes - update the counter and store it to the shared memory
-#### If in writer mode
-##### in the interrupt handler
-* In the interupt, give the semaphore (maybe only if the movement direction and desired movement direction are different)
-##### In the main loop
-* wait fot the semaphore to be released
-* check for the desired value and real motor position
-* manage pwm signals to make motor be moved to the proper direction or to be stopped
+- Denys Datsko
+- Morhunenko Mykola
 
-### UDP communication
-#### On reader board loop
-* Wait for some time (e.g. 20 ms)
-* Read the current motor absolute position from the shared memory
-* Send the motor position through sockets to another device
-#### On motor controller board loop
-* Wait for the packet from the second board
-* Write the updated data to the shared memory
-* Give the semaphore to make the driver "see" the changes
+## Short project description
 
- ### Web server
- ## TODO: Document this too
+The main goal of the semester project was to create such a program, that reads the position from one motor (moved by
+hand or steer-by-wire), sends desired position via the Internet to another motor and sets it to another motor. The
+set-point is transferred between two motor controllers using UDP messages. The actual state of the controller and its
+history is published as live plots over http protocol.
+
+We implemented:
+
+- IRQ handler for reading and (maybe) updating some information
+- motor driver for controlling step motors
+- partially implemented PID controller for motors (P part, as we understand it, is implemented)
+- UDP server for inter-controllers-communication using BSD sockets
+- HTTP server for data visualisation in a browser
+- SVG Plots library (we took [nanosvg](https://github.com/memononen/nanosvg) lib, modified it as we need, and wrote
+  documentation + few more functions for it)
+
+## Instructions for compiling and running your application.
+
+Project was written and tested only on Linux-based OS, for VxWorks RTOS in WindRiver IDE. Such files as `.project`
+, `.cpoject`, `.wrproject` and `.wrmakefile` files are given for building and executing.  
+So to compile the project, open it using the WindRiver IDE and build it **Project -> Build project**   
+
+## Screenshot of your web-based (or text-based) user interface
+
+TODO
+
+## Data-Flow Diagram.
+
+![Structure from drawio](https://user-images.githubusercontent.com/35429810/145839149-233df933-eaf2-461b-ba59-05410f1e0474.png)
+
+## Description of global functions and variables (created by you) including the description of function parameters and return values.
+
+The documentation generation by Doxygen and `doxy.conf` is possible. You can generate `doc/` folder
+with `doxygen doxy.conf`. To receive `.pdf`, go to `/doc/latex` folder and run `make` there. To open the documentation
+as a web page, go to `doc/html/` folder and open the html file using any browser

@@ -6,6 +6,7 @@
 #define HTTP_RECCEIVER_BUF_SIZE 5000
 
 void run_http_srv();
+
 void update_statistics();
 
 
