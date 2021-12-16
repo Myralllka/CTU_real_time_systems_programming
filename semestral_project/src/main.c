@@ -1,4 +1,8 @@
 #include <taskLib.h>
+#include <sysLib.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "../include/shared.h"
 #include "../include/server.h"
@@ -17,7 +21,6 @@ void create_tasks(bool transmiter, char *ip_address) {
 	sysTimestampEnable();
 	motor_history.timestamp_start = sysTimestamp();
 
-	printf("%lu\n", sizeof(motor_history.desired_position));
     // setting all arrays to zero, because we are reading from them
 	memset(motor_history.desired_position, 0, sizeof(motor_history.desired_position));
 	memset(motor_history.position, 0, sizeof(motor_history.position));

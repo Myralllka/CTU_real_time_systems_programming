@@ -26,19 +26,15 @@ static void one_client_server(int client_fd) {
             return;
         }
         buf[message_size] = '\0';
-        // Ignoring all headers for now. TODO:
+        // Ignoring all headers for now.
         // Dealing only with GET request to the root
-#ifdef DEBUG_OUTPUT
-        int i;
-        for (i = 0; i < message_size; i++)
-            printf("%c", buf[i]);
-
-#endif
-       // Firstly, check if the request is the GET one to the root
+        // Firstly, check if the request is the GET one to the root
         if (message_size > 5) {
             if (strncmp(buf, "GET / ", 6) == 0) {
+#ifdef DEBUG_OUTPUT
                 printf("Sending SVG..\n");
-                FILE *f = fdopen(client_fd, "w");i
+#endif
+                FILE *f = fdopen(client_fd, "w");
 
                 // Send the only header
                 fprintf(f, "HTTP/1.0 200 OK\r\n\r\n");

@@ -28,15 +28,22 @@ We implemented:
 
 Project was written and tested only on Linux-based OS, for VxWorks RTOS in WindRiver IDE. Such files as `.project`
 , `.cpoject`, `.wrproject` and `.wrmakefile` files are given for building and executing.  
-So to compile the project, open it using the WindRiver IDE and build it **Project -> Build project**   
+So to compile the project, open it using the WindRiver IDE and build it **Project -> Build project**  
+Then, 2 run configurations for 2 boards should be created:
+* The first one runs the CreateTasks with arguments (false, NULL) and this board will receive the desired motor position and move motor there
+* The arguments of CreateTasks for the second cpnfiguration should be (true, "<first_board_ip_address>"). This board will just read the motor position and send it to the specified ip address
 
 ## Screenshot of your web-based (or text-based) user interface
 
-TODO
+![Web interface screenshot](/media/Web_interface_screenshot.png)
+For doxygen: 
+\image latex Web_interface_screenshot.png "Screenshot" width=10cm
 
 ## Data-Flow Diagram.
 
-![Structure from drawio](https://user-images.githubusercontent.com/35429810/145839149-233df933-eaf2-461b-ba59-05410f1e0474.png)
+![Structure from drawio](/media/diagram.png)
+For doxygen:
+\image latex diagram.png "Diagram" width=10cm
 
 ## Description of global functions and variables (created by you) including the description of function parameters and return values.
 
